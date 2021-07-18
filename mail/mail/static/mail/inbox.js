@@ -35,18 +35,12 @@ function load_mailbox(mailbox) {
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
-  if (document.querySelector('#email_display') != null){
+  //
 
-    document.querySelector('#email_display').style.display = 'none';
+  load_inbox(mailbox);
+  
 
-  }  
 
-  //acquire emails from API
-   if (mailbox === 'inbox'){      
-     // if (document.querySelector('#email_display') === null){
-       // load_inbox()
-     // }   
-   }
 
 }
 
@@ -63,21 +57,20 @@ function send_email() {
     body: JSON.stringify({
         recipients: document.querySelector('#compose-recipients').value,
         subject: document.querySelector('#compose-subject').value,
-        body: document.querySelector('#compose-body').value
+        body: document.querySelector('#compose-body').value,
+        read: false
     })
   })
 
 }
 
 
-function load_inbox(){
+function load_inbox(mailbox){
 
-  fetch('/emails/inbox')
+
+  fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
-
-    let email_display = document.createElement('div')
-    email_display.id = 'email_display'
 
     //loop through emails
     for (let i = 0; i < emails.length; i++){
@@ -118,16 +111,29 @@ function load_inbox(){
       //assign parent div ad id based on the email's id for future identification
       parent_div.id = emails[i]['id']
 
-      //write parent div to body element
-      email_display.appendChild(parent_div)
-      //document.body.appendChild(parent_div)
+
+      // onclick event for displaying email details, defined below
+      parent_div.addEventListener("click", function(){ show_email(emails[i]['id'])});
+
+      //write parent div to emails-view element
+      document.querySelector('#emails-view').appendChild(parent_div)
 
     }
 
-    document.body.appendChild(email_display)
-
   });
 
+}
 
+
+function show_email(id){
+
+  fetch(`/emails/${id}`)
+  .then(response => response.json())
+  .then(email => {
+      // Print email
+      console.log(email);
+  
+      // ... do something else with email ...
+  });
 
 }
